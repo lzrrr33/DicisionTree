@@ -12,15 +12,20 @@ Name(名字)
 Age(年龄)   
 Embarked(登船港口)  
 Sex(性别)  
- ![image](https://github.com/lzrrr33/DicisionTree/tree/master/image/dataset.png)  
+![](/image/dataset.png)  
 预处理：  
 1.对缺失数据及错误数据进行删除处理  
 2.将年龄分为baby,child,adult和old  
 3.按4:1对数据集进行随即划分为训练集和测试集  
- ![image](https://github.com/lzrrr33/DicisionTree/tree/master/image/newdataset.png)  
+ ![](/image/newdataset.png)  
 # 训练结果
 ## ID3决策树生成：
+![](/image/ID3Tree.png)  
 ## CART决策树生成
-
+![](/image/CARDTree.png) 
 # 测试结果
+|决策树种类|准确率|  
+|--|--|
+|ID3Tree| 68.2% |  
+| CARDTree | 80.4% |  
 
