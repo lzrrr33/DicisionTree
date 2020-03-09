@@ -1,7 +1,7 @@
 from math import log
 import operator
 import  random
-def chooseLeft(data):
+def chooseLeft(data,labels):
     featurenum = len(data[0])-1
     baseEntropy = computeShannonEnt(data)
     maxGain = 0.0
@@ -24,7 +24,8 @@ def chooseLeft(data):
         # 信息增益
         infoGain = baseEntropy - newEntropy
         # 打印每个特征的信息增益
-        print("第%d个特征的增益为%.3f" % (i, infoGain))
+        
+        print("特征%s的增益为%.3f" % (labels[i], infoGain))
         # 计算信息增益
         if (infoGain > maxGain):
             # 更新信息增益，找到最大的信息增益
@@ -32,6 +33,7 @@ def chooseLeft(data):
             # 记录信息增益最大的特征的索引值
             bestFeature = i
             # 返回信息增益最大特征的索引值
+    print("最大增益特征：",labels[bestFeature])
     return bestFeature
 
 
@@ -122,8 +124,7 @@ def createTree(dataSet,labels,featLabels):
     #取分类标签（是否存活：yes or no）
     classList=[example[-1] for example in dataSet]
     #如果类别完全相同，则停止继续划分
-    print(labels)
-    print('classlist',classList)
+    
     if len(labels)==0:
         return max(set(classList), key=classList.count)
     if classList.count(classList[0])==len(classList):
@@ -133,7 +134,7 @@ def createTree(dataSet,labels,featLabels):
         # print(majorityCnt(classList))
         return majorityCnt(classList)
     #选择最优特征
-    bestFeat=chooseLeft(dataSet)
+    bestFeat=chooseLeft(dataSet,labels)
     #最优特征的标签
 
     bestFeatLabel=labels[bestFeat]
@@ -202,6 +203,6 @@ if __name__ == '__main__':
         out = classify(myTree,featLabels,people)
         if out==label:
             rightnum+=1
-    print(myTree)
-    print(rightnum/len(testdata))
-    compute(data)
+    print("tree:",myTree)
+    print("ap:",rightnum/len(testdata))
+ 
