@@ -1,7 +1,9 @@
 from math import log
 import operator
 import random
-
+import operator
+import copy
+import re
 
 def chooseLeft(data, labels):
     featurenum = len(data[0]) - 1
@@ -27,7 +29,7 @@ def chooseLeft(data, labels):
         infoGain = baseEntropy - newEntropy
         # 打印每个特征的信息增益
 
-        print("特征%s的增益为%.3f" % (labels[i], infoGain))
+        # print("特征%s的增益为%.3f" % (labels[i], infoGain))
         # 计算信息增益
         if (infoGain > maxGain):
             # 更新信息增益，找到最大的信息增益
@@ -35,7 +37,7 @@ def chooseLeft(data, labels):
             # 记录信息增益最大的特征的索引值
             bestFeature = i
             # 返回信息增益最大特征的索引值
-    print("最大增益特征：", labels[bestFeature])
+    # print("最大增益特征：", labels[bestFeature])
     return bestFeature
 
 
@@ -163,6 +165,7 @@ def createTree(dataSet, labels, deepth):
     return myTree
 
 
+
 def classify(tree, people, labels):
     classLabel = 0
     # 获取决策树节点
@@ -179,23 +182,51 @@ def classify(tree, people, labels):
                     classLabel = secondDict[key]
         return classLabel
 
+def test(tree, dataset,labels):
+    rightnum = 0
+    # print(dataset)
+    # print(tree)
+    for people in dataset:
+        label = people[-1]
+        out = classify(tree, people, labels)
+        if out == label:
+            rightnum += 1
+    ap = rightnum / len(dataset)
+    return ap
 
-def compute(data):
-    mannum = 0
-    manlive = 0
-    womennum = 0
-    womenlive = 0
-    for p in data:
-        if p[3] == 0:
-            womennum += 1
-            if p[4] == 1:
-                womenlive += 1
-        else:
-            mannum += 1
-            if p[4] == 1:
-                manlive += 1
-    print('男性存活率:', manlive / mannum)
-    print('女性存活率:', womenlive / womennum)
+# 悲观剪枝
+def Pruning(PreTree, dataSet,labels):
+    firstStr = next(iter(PreTree))
+    # 下一个字典
+    secondDict = PreTree[firstStr]
+    # 遍历字典
+    bestFeat = labels.index(firstStr)
+    for k in PreTree.keys():
+        for key in secondDict.keys():
+            if (PreTree[firstStr][key]!=0) & (PreTree[firstStr][key]!=1) & (len(dataSet)!=0):
+                newTree = copy.deepcopy(PreTree)
+                newTree[firstStr][key] = 0
+
+                ap = test(PreTree, dataSet,labels)
+
+                newap0 = test(newTree, dataSet ,labels)
+                if newap0 +0.002> ap:
+                    return newTree
+
+                newTree[firstStr][key] = 1
+                newap1 = test(newTree, dataSet ,labels)
+                if newap1 +0.002> ap:
+                    return newTree
+
+                # print('ap',ap)
+                # print('newap0', newap0)
+                # print('newap1', newap1)
+
+                newTree[firstStr][key] = Pruning(PreTree[firstStr][key], splitDataSet(dataSet, bestFeat, key),labels)
+
+                return newTree
+
+
 
 
 
@@ -204,16 +235,13 @@ if __name__ == '__main__':
     random.shuffle(data)
     traindata = data[:425]
     testdata = data[425:]
-
     myTree = createTree(traindata, labels, 4)
-    rightnum = 0
-    print(labels)
-    print("tree:", myTree)
+    print('preTree',myTree)
 
-    for people in testdata:
-        label = people[4]
-        out = classify(myTree, people,labels)
-        if out == label:
-            rightnum += 1
+    preap = test(myTree, testdata, labels)
+    print('ap_before_Pruning:', preap)
+    NewTree = Pruning(myTree, traindata,labels)
+    print('afterTree', NewTree)
+    afterap = test(NewTree, testdata, labels)
 
-    print("ap:", rightnum / len(testdata))
+    print("ap_after_Pruning:", afterap)
